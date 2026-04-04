@@ -92,6 +92,44 @@ class Queue:
         return timestamp
 
     def enqueue(self, item: TaskSubmission) -> int:
+        """
+        Enqueue a TaskSubmission and its dependencies into the queue with
+        deduplication and timestamp-based replacement semantics.
+
+        The method expands the input task into its dependency closure and
+        applies default metadata normalization before insertion. Each task is
+        uniquely identified by the tuple (provider, user_id).
+
+        If the queue is empty, all resolved tasks are appended directly.
+
+        If the queue is non-empty, existing tasks are checked for duplicates:
+        when a task with the same (provider, user_id) already exists, it is
+        replaced only if the incoming task has an earlier timestamp. In that
+        case, the existing task is removed and the new task is appended to the
+        end of the queue to preserve ordering constraints.
+
+        Parameters
+        ----------
+        item : TaskSubmission
+            The task to enqueue, including any transitive dependencies.
+
+        Returns
+        -------
+        int
+            The size of the queue after the enqueue operation.
+
+        Notes
+        -----
+        - Task identity is defined by (provider, user_id).
+        - Timestamp comparison determines replacement priority (earlier wins).
+        - Queue order is preserved except when replacements occur, where the
+        updated task is moved to the end of the queue.
+        - Metadata fields "priority" and "group_earliest_timestamp" are ensured
+        to exist for all tasks.
+        - Dependencies are resolved via `_collect_dependencies(item)` and are
+        enqueued alongside the input item.
+        """
+
         tasks = [*self._collect_dependencies(item), item]
         new_tasks = {}
         for task in tasks:
@@ -256,4 +294,5 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
