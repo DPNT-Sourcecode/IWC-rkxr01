@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import datetime, timezone, timedelta
 from typing import Any, Callable, Iterable
 
-from solutions.IWC.queue_solution_entrypoint import QueueSolutionEntrypoint
-from solutions.IWC.task_types import TaskDispatch, TaskSubmission
+from lib.solutions.IWC.queue_solution_entrypoint import QueueSolutionEntrypoint
+from lib.solutions.IWC.task_types import TaskDispatch, TaskSubmission
 
 
 DEFAULT_SCENARIO_BASE = datetime(2025, 1, 1, 12, 0, tzinfo=timezone.utc)
@@ -72,3 +72,4 @@ def run_queue(actions: Iterable[dict[str, Any]]) -> None:
 
 
 __all__ = ["iso_ts", "call_enqueue", "call_size", "call_dequeue", "run_queue"]
+
