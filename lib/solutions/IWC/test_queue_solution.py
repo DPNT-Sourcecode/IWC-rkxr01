@@ -71,4 +71,3 @@ async def queue_worker():
         logger.info(f"Processing task: {task}")
         await asyncio.sleep(2)
         logger.info(f"Finished task: {task}")
-

@@ -25,5 +25,3 @@ class QueueSolutionEntrypoint:
     def purge(self) -> bool:
         return self._queue.purge()
 
-
-
