@@ -2,6 +2,8 @@ import asyncio
 import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from pydantic.main import BaseModel
 from lib.solutions.IWC.queue_solution_legacy import Queue
 
 logging.basicConfig(level=logging.INFO)
@@ -69,3 +71,4 @@ async def queue_worker():
         logger.info(f"Processing task: {task}")
         await asyncio.sleep(2)
         logger.info(f"Finished task: {task}")
+
