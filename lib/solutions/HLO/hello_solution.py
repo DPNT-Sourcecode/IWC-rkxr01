@@ -7,4 +7,3 @@ class HelloSolution:
         """
         return f"Hello, {friend_name}!"
 
-print(HelloSolution().hello("Mr X."))
