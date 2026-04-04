@@ -94,6 +94,9 @@ class Queue:
     def enqueue(self, item: TaskSubmission) -> int:
         tasks = [*self._collect_dependencies(item), item]
 
+        for task in self._queue:
+            
+
         for task in tasks:
             unique_task = (task.provider, task.user_id)
             if unique_task in self._priority_queue:
@@ -254,5 +257,6 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
