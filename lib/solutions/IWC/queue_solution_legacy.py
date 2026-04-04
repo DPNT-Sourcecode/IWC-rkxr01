@@ -95,6 +95,9 @@ class Queue:
         tasks = [*self._collect_dependencies(item), item]
         new_tasks = {}
         for task in tasks:
+            metadata = task.metadata
+            metadata.setdefault("priority", Priority.NORMAL)
+            metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
             new_tasks[(task.provider, task.user_id)] = task
 
         for idx, existing_task in enumerate(self._queue):
@@ -102,26 +105,9 @@ class Queue:
             if existing_task_id in new_tasks:
                 if new_tasks[existing_task_id].timestamp < existing_task.timestamp:
                     self._queue.pop(idx)
+                    self._queue.append(new_tasks[existing_task_id])
                 else:
                     continue
-
-
-        for task in tasks:
-            unique_task = (task.provider, task.user_id)
-            if unique_task in self._priority_queue:
-                existing_task = self._priority_queue[unique_task]
-                if task.timestamp < existing_task.timestamp:
-                    metadata = task.metadata
-                    metadata.setdefault("priority", Priority.NORMAL)
-                    metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
-                    self._priority_queue[unique_task] = task
-                    self._queue.append(task)
-            else:
-                metadata = task.metadata
-                metadata.setdefault("priority", Priority.NORMAL)
-                metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
-                self._priority_queue[unique_task] = task
-                self._queue.append(task)
         return self.size
 
     def dequeue(self):
@@ -266,10 +252,3 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
-
-
-
-
-
-
-
