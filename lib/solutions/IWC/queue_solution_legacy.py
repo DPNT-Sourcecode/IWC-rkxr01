@@ -97,9 +97,10 @@ class Queue:
         for task in tasks:
             ordered_tasks[(task.provider, task.user_id)] = task
 
-        for task in self._queue:
+        for idx, existing_task in enumerate(self._queue):
+            existing_task_id = (task.pro)
             if task in ordered_tasks:
-                
+                if ordered_tasks[(task.provider)] < existing_task.timestamp:
 
         for task in tasks:
             unique_task = (task.provider, task.user_id)
@@ -261,6 +262,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
