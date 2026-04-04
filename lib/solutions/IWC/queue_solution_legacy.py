@@ -146,6 +146,7 @@ class Queue:
         for idx, existing_task in enumerate(self._queue):
             existing_task_id = (existing_task.provider, existing_task.user_id)
             if existing_task_id in new_tasks:
+                print("found in new tasks")
                 if new_tasks[existing_task_id].timestamp < existing_task.timestamp:
                     self._queue.pop(idx)
                     self._queue.append(new_tasks[existing_task_id])
@@ -295,6 +296,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
