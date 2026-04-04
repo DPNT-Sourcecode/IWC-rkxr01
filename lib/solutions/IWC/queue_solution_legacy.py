@@ -145,7 +145,6 @@ class Queue:
         return TaskDispatch(
             provider=task.provider,
             user_id=task.user_id,
-            timestamp=task.timestamp,
         )
 
     @property
@@ -243,3 +242,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+

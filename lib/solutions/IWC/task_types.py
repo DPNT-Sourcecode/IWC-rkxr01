@@ -21,7 +21,7 @@ class TaskDispatch:
 
     provider: str
     user_id: int
-    timestamp: datetime | str
 
 
 __all__ = ["TaskSubmission", "TaskDispatch"]
+
