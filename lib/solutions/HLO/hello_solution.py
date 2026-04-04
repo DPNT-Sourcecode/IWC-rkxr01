@@ -6,6 +6,3 @@ class HelloSolution:
         Function that returns a string with the message 'Hello, {friend_name}!'
         """
         return f"Hello, {friend_name}!"
-
-
-
