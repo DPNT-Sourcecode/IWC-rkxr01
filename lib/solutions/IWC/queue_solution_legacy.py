@@ -94,6 +94,7 @@ class Queue:
         tasks = [*self._collect_dependencies(item), item]
 
         for task in tasks:
+            
             metadata = task.metadata
             metadata.setdefault("priority", Priority.NORMAL)
             metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
@@ -242,5 +243,6 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
