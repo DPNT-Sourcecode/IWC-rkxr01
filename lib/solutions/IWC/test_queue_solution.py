@@ -2,7 +2,7 @@ import asyncio
 import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from solutions.IWC.queue_solution_legacy import Queue
+from lib.solutions.IWC.queue_solution_legacy import Queue
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
