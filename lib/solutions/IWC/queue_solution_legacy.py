@@ -99,14 +99,17 @@ class Queue:
             if unique_task in self._priority_queue:
                 existing_task = self._priority_queue[unique_task]
                 if task.timestamp < existing_task.timestamp:
+                    metadata = task.metadata
+                    metadata.setdefault("priority", Priority.NORMAL)
+                    metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
                     self._priority_queue[unique_task] = task
+                    self._queue.append(task)
             else:
+                metadata = task.metadata
+                metadata.setdefault("priority", Priority.NORMAL)
+                metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
                 self._priority_queue[unique_task] = task
-            metadata = task.metadata
-            metadata.setdefault("priority", Priority.NORMAL)
-            metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
-            self._queue.append(task)
-            self._priority_queue[(task.provider, task.user_id)] = task
+                self._queue.append(task)
         return self.size
 
     def dequeue(self):
@@ -251,4 +254,5 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
