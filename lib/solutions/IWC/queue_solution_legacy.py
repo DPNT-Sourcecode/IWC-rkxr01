@@ -93,14 +93,16 @@ class Queue:
 
     def enqueue(self, item: TaskSubmission) -> int:
         tasks = [*self._collect_dependencies(item), item]
-        ordered_tasks = {}
+        new_tasks = {}
         for task in tasks:
-            ordered_tasks[(task.provider, task.user_id)] = task
+            new_tasks[(task.provider, task.user_id)] = task
 
         for idx, existing_task in enumerate(self._queue):
-            existing_task_id = (task.pro)
-            if task in ordered_tasks:
-                if ordered_tasks[(task.provider)] < existing_task.timestamp:
+            existing_task_id = (existing_task.provider, existing_task.user_id)
+            if existing_task_id in new_tasks:
+                if new_tasks[existing_task_id].timestamp < existing_task.timestamp:
+                    self._queue.pop(idx)
+                    
 
         for task in tasks:
             unique_task = (task.provider, task.user_id)
@@ -262,6 +264,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
