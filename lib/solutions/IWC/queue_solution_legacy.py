@@ -100,6 +100,10 @@ class Queue:
             metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
             new_tasks[(task.provider, task.user_id)] = task
 
+        if self.size == 0:
+            self._queue.extend(tasks)
+            return self._size
+
         for idx, existing_task in enumerate(self._queue):
             existing_task_id = (existing_task.provider, existing_task.user_id)
             if existing_task_id in new_tasks:
@@ -108,6 +112,7 @@ class Queue:
                     self._queue.append(new_tasks[existing_task_id])
                 else:
                     continue
+        print(self._queue)
         return self.size
 
     def dequeue(self):
@@ -252,3 +257,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
