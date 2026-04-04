@@ -102,7 +102,7 @@ class Queue:
 
         if self.size == 0:
             self._queue.extend(tasks)
-            return self._size
+            return self.size
 
         for idx, existing_task in enumerate(self._queue):
             existing_task_id = (existing_task.provider, existing_task.user_id)
@@ -112,7 +112,6 @@ class Queue:
                     self._queue.append(new_tasks[existing_task_id])
                 else:
                     continue
-        print(self._queue)
         return self.size
 
     def dequeue(self):
