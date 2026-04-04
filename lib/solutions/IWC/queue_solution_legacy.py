@@ -50,6 +50,7 @@ REGISTERED_PROVIDERS: list[Provider] = [
 class Queue:
     def __init__(self):
         self._queue = []
+        self._priority_queue = {}
 
     def _collect_dependencies(self, task: TaskSubmission) -> list[TaskSubmission]:
         provider = next((p for p in REGISTERED_PROVIDERS if p.name == task.provider), None)
@@ -93,6 +94,7 @@ class Queue:
     def enqueue(self, item: TaskSubmission) -> int:
         task_unique = (item.provider, item.user_id)
         
+
         tasks = [*self._collect_dependencies(item), item]
 
         for task in tasks:
@@ -244,6 +246,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
