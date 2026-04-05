@@ -158,45 +158,38 @@ class Queue:
 
     @staticmethod
     def _provider_speed_priority(task: TaskSubmission) -> int:
-        return 1 if task.provider == "bank_statements" else 0
-
-    def enqueue(self, item: TaskSubmission) -> int:
         """
-        Enqueue a TaskSubmission and its dependencies into the queue with
-        deduplication and timestamp-based replacement semantics.
-
-        The method expands the input task into its dependency closure and
-        applies default metadata normalization before insertion. Each task is
-        uniquely identified by the tuple (provider, user_id).
-
-        If the queue is empty, all resolved tasks are appended directly.
-
-        If the queue is non-empty, existing tasks are checked for duplicates:
-        when a task with the same (provider, user_id) already exists, it is
-        replaced only if the incoming task has an earlier timestamp. In that
-        case, the existing task is removed and the new task is appended to the
-        end of the queue to preserve ordering constraints.
+        Assign a relative ordering rank based on provider type.
 
         Parameters
         ----------
-        item : TaskSubmission
-            The task to enqueue, including any transitive dependencies.
+        task : TaskSubmission
+            The task whose provider rank is to be determined.
 
         Returns
         -------
         int
-            The size of the queue after the enqueue operation.
+            0 for normal providers, 1 for "bank_statements".
+        """
+        return 1 if task.provider == "bank_statements" else 0
 
-        Notes
-        -----
-        - Task identity is defined by (provider, user_id).
-        - Timestamp comparison determines replacement priority (earlier wins).
-        - Queue order is preserved except when replacements occur, where the
-        updated task is moved to the end of the queue.
-        - Metadata fields "priority" and "group_earliest_timestamp" are ensured
-        to exist for all tasks.
-        - Dependencies are resolved via `_collect_dependencies(item)` and are
-        enqueued alongside the input item.
+    def enqueue(self, item: TaskSubmission) -> int:
+        """
+        Add a task and its dependencies to the queue.
+
+        The method expands the input task into its dependency closure and
+        inserts all tasks into the queue with deduplication and replacement
+        semantics based on timestamp.
+
+        Parameters
+        ----------
+        item : TaskSubmission
+            The task to enqueue.
+
+        Returns
+        -------
+        int
+            The size of the queue after insertion.
         """
 
         index_map = {
@@ -227,6 +220,19 @@ class Queue:
         return self.size
 
     def dequeue(self) -> TaskDispatch:
+        """
+        Remove and return the next task to be processed.
+
+        The queue is reordered prior to removal based on:
+        - Rule of 3 (priority escalation for users with >= 3 tasks)
+        - Provider deprioritisation ("bank_statements")
+        - Timestamp ordering
+
+        Returns
+        -------
+        TaskDispatch or None
+            The next task to process, or ``None`` if the queue is empty.
+        """
         if self.size == 0:
             return None
 
@@ -280,10 +286,27 @@ class Queue:
 
     @property
     def size(self) -> int:
+        """
+        Return the number of tasks currently in the queue.
+
+        Returns
+        -------
+        int
+            The number of pending tasks.
+        """
         return len(self._queue)
 
     @property
     def age(self) -> int:
+        """
+        Compute the time span between the oldest and newest tasks in the queue.
+
+        Returns
+        -------
+        int
+            The difference in seconds between the earliest and latest task
+            timestamps, or 0 if the queue is empty.
+        """
         if self.size == 0:
             return 0
         timestamps = [self._timestamp_for_task(task) for task in self._queue]
@@ -292,6 +315,14 @@ class Queue:
         return int((newest - oldest).total_seconds())
 
     def purge(self) -> bool:
+        """
+        Clear all tasks from the queue.
+
+        Returns
+        -------
+        bool
+            True if the queue was successfully cleared.
+        """
         self._queue.clear()
         return True
 
@@ -379,6 +410,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
