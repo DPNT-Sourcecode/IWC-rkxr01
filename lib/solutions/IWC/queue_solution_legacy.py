@@ -4,7 +4,7 @@ from enum import IntEnum
 
 # LEGACY CODE ASSET
 # RESOLVED on deploy
-from solutions.IWC.task_types import TaskSubmission, TaskDispatch
+from .task_types import TaskSubmission, TaskDispatch
 
 
 class Priority(IntEnum):
@@ -325,9 +325,7 @@ class Queue:
         priority_timestamps = {}
         for user_id in user_ids:
             user_tasks = [t for t in self._queue if t.user_id == user_id]
-            earliest_timestamp = sorted(user_tasks, key=lambda t: t.timestamp)[
-                0
-            ].timestamp
+            earliest_timestamp = min(self._timestamp_for_task(t) for t in user_tasks)
             priority_timestamps[user_id] = earliest_timestamp
             task_count[user_id] = len(user_tasks)
 
@@ -362,6 +360,7 @@ class Queue:
                 self._earliest_group_timestamp_for_task(i),
                 self._provider_speed_priority(i, newest_timestamp),
                 self._timestamp_for_task(i),
+                self._sequence_for_task(i),
             )
         )
 
@@ -536,6 +535,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
