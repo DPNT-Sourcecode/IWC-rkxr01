@@ -257,5 +257,3 @@ def test_time_sensitive_bank_statement_respects_fifo_for_equal_timestamps(queue)
     assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=1)
     assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
     assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=6)
-
-
