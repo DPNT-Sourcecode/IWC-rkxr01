@@ -4,9 +4,9 @@ from enum import IntEnum
 
 # LEGACY CODE ASSET
 # RESOLVED on deploy
-from .task_types import TaskSubmission, TaskDispatch
+from solutions.IWC.task_types import TaskSubmission, TaskDispatch
 
-# solutions.IWC.
+# solutions.IWC
 
 
 class Priority(IntEnum):
@@ -62,9 +62,9 @@ class Queue:
         """
         Recursively collect all dependency tasks for a given task.
 
-        Dependencies are resolved using the ``REGISTERED_PROVIDERS`` registry.
-        For each dependency, a new ``TaskSubmission`` is created with the same
-        ``user_id`` and ``timestamp``.
+        Dependencies are resolved using the REGISTERED_PROVIDERS registry.
+        For each dependency, a new TaskSubmission is created with the same
+        user_id and timestamp.
 
         Parameters
         ----------
@@ -129,7 +129,7 @@ class Queue:
         -------
         datetime
             The earliest timestamp associated with the task's user group,
-            or ``MAX_TIMESTAMP`` if not set.
+            or MAX_TIMESTAMP if not set.
         """
         metadata = task.metadata
         return metadata.get("group_earliest_timestamp", MAX_TIMESTAMP)
@@ -219,7 +219,7 @@ class Queue:
 
         return self.size
 
-    def dequeue(self) -> TaskDispatch:
+    def dequeue(self) -> TaskDispatch | None:
         """
         Remove and return the next task to be processed.
 
@@ -231,7 +231,7 @@ class Queue:
         Returns
         -------
         TaskDispatch or None
-            The next task to process, or ``None`` if the queue is empty.
+            The next task to process, or None if the queue is empty.
         """
         if self.size == 0:
             return None
@@ -410,6 +410,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
