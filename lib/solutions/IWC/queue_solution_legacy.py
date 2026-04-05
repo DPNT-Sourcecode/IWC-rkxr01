@@ -4,7 +4,7 @@ from enum import IntEnum
 
 # LEGACY CODE ASSET
 # RESOLVED on deploy
-from solutions.IWC.task_types import TaskSubmission, TaskDispatch
+from .task_types import TaskSubmission, TaskDispatch
 
 # solutions.IWC
 
@@ -425,6 +425,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
