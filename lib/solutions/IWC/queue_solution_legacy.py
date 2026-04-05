@@ -86,12 +86,12 @@ class Queue:
             return Priority.NORMAL
 
     @staticmethod
-    def _earliest_group_timestamp_for_task(task):
+    def _earliest_group_timestamp_for_task(task: TaskSubmission) -> datetime:
         metadata = task.metadata
         return metadata.get("group_earliest_timestamp", MAX_TIMESTAMP)
 
     @staticmethod
-    def _timestamp_for_task(task):
+    def _timestamp_for_task(task: TaskSubmission) -> datetime:
         timestamp = task.timestamp
         if isinstance(timestamp, datetime):
             return timestamp.replace(tzinfo=None)
@@ -100,7 +100,7 @@ class Queue:
         return timestamp
 
     @staticmethod
-    def _provider_speed_priority(task):
+    def _provider_speed_priority(task: TaskSubmission) -> int:
         return 1 if task.provider == "bank_statements" else 0
 
     def enqueue(self, item: TaskSubmission) -> int:
@@ -169,7 +169,7 @@ class Queue:
 
         return self.size
 
-    def dequeue(self):
+    def dequeue(self) -> TaskDispatch:
         if self.size == 0:
             return None
 
@@ -222,11 +222,11 @@ class Queue:
         )
 
     @property
-    def size(self):
+    def size(self) -> int:
         return len(self._queue)
 
     @property
-    def age(self):
+    def age(self) -> int:
         if self.size == 0:
             return 0
         timestamps = [self._timestamp_for_task(task) for task in self._queue]
@@ -234,7 +234,7 @@ class Queue:
         newest = max(timestamps)
         return int((newest - oldest).total_seconds())
 
-    def purge(self):
+    def purge(self) -> bool:
         self._queue.clear()
         return True
 
@@ -322,6 +322,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
