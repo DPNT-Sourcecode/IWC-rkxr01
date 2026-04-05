@@ -59,6 +59,23 @@ class Queue:
         self._queue = []
 
     def _collect_dependencies(self, task: TaskSubmission) -> list[TaskSubmission]:
+        """
+        Recursively collect all dependency tasks for a given task.
+
+        Dependencies are resolved using the ``REGISTERED_PROVIDERS`` registry.
+        For each dependency, a new ``TaskSubmission`` is created with the same
+        ``user_id`` and ``timestamp``.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task for which dependencies should be resolved.
+
+        Returns
+        -------
+        list[TaskSubmission]
+            A list of dependency tasks in dependency order (parents before children).
+        """
         provider = next(
             (p for p in REGISTERED_PROVIDERS if p.name == task.provider), None
         )
@@ -78,6 +95,19 @@ class Queue:
 
     @staticmethod
     def _priority_for_task(task: TaskSubmission) -> Priority:
+        """
+        Determine the priority level for a task.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task whose priority is to be evaluated.
+
+        Returns
+        -------
+        Priority
+            The resolved priority level (HIGH or NORMAL).
+        """
         metadata = task.metadata
         raw_priority = metadata.get("priority", Priority.NORMAL)
         try:
@@ -87,11 +117,38 @@ class Queue:
 
     @staticmethod
     def _earliest_group_timestamp_for_task(task: TaskSubmission) -> datetime:
+        """
+        Retrieve the group-level earliest timestamp for a task.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task whose group timestamp is to be retrieved.
+
+        Returns
+        -------
+        datetime
+            The earliest timestamp associated with the task's user group,
+            or ``MAX_TIMESTAMP`` if not set.
+        """
         metadata = task.metadata
         return metadata.get("group_earliest_timestamp", MAX_TIMESTAMP)
 
     @staticmethod
     def _timestamp_for_task(task: TaskSubmission) -> datetime:
+        """
+        Normalise the timestamp of a task to a timezone-naive datetime.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task whose timestamp is to be normalised.
+
+        Returns
+        -------
+        datetime
+            A timezone-naive datetime object representing the task timestamp.
+        """
         timestamp = task.timestamp
         if isinstance(timestamp, datetime):
             return timestamp.replace(tzinfo=None)
@@ -322,6 +379,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
