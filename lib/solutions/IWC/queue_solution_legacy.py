@@ -283,7 +283,9 @@ class Queue:
             if priority_level is None or priority_level == Priority.NORMAL:
                 metadata["group_earliest_timestamp"] = MAX_TIMESTAMP
                 if task_count[task.user_id] >= 3:
-                    metadata["group_earliest_timestamp"] = priority_timestamps[task.user_id]
+                    metadata["group_earliest_timestamp"] = priority_timestamps[
+                        task.user_id
+                    ]
                     metadata["priority"] = Priority.HIGH
                 else:
                     metadata["priority"] = Priority.NORMAL
@@ -300,9 +302,18 @@ class Queue:
             )
         )
 
-        aged_bank_tasks = [task for task in self._queue if self._is_time_sensitive_bank_task(task, newest_timestamp)]
+        aged_bank_tasks = [
+            task
+            for task in self._queue
+            if self._is_time_sensitive_bank_task(task, newest_timestamp)
+        ]
 
-        
+        aged_bank_tasks.sort(
+            key=lambda i: (
+                self._timestamp_for_task(i),
+                self._sequence_for_task(i),
+            )
+        )
 
         task = self._queue.pop(0)
         return TaskDispatch(
@@ -436,6 +447,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
