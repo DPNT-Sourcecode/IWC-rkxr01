@@ -65,7 +65,6 @@ def test_timestamp_ordering_older_timestamp_processed_first(queue):
 
 
 def test_rule_of_three_moves_all_tasks_for_that_user_to_front(queue):
-    # Mirrors the example from the text spec.
     assert queue.enqueue(make_task("companies_house", 1, "2025-10-20 12:00:00")) == 1
     assert queue.enqueue(make_task("bank_statements", 2, "2025-10-20 12:00:00")) == 2
     assert queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00")) == 3
@@ -263,3 +262,4 @@ def test_non_aged_bank_statement_still_deprioritized(queue):
     assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=2)
     assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=3)
     assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
+
