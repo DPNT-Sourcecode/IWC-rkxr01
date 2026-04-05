@@ -178,7 +178,11 @@ class Queue:
         return True if task.provider == "bank_statements" else False
     
     def _is_time_sensitive_bank_task(self, task: TaskSubmission, newest_timestamp: datetime) -> bool:
-        if not self._is_bank_statements_provider
+        if not self._is_bank_statements_provider:
+            return False
+        
+        task_timestamp = self._timestamp_for_task(task)
+        return (newest_timestamp - task_timestamp) >= 
 
     def enqueue(self, item: TaskSubmission) -> int:
         """
@@ -417,5 +421,6 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
