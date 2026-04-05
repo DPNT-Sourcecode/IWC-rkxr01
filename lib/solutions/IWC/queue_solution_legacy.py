@@ -315,6 +315,30 @@ class Queue:
             )
         )
 
+        for bank_task in aged_bank_tasks:
+            self._queue.remove(bank_task)
+
+            bank_timestamp = self._timestamp_for_task(bank_task)
+            bank_sequence = self._sequence_for_task(bank_task)
+
+            insert_at = 0
+            for idx, existing_task in enumerate(self._queue):
+                existing_timestamp = self._timestamp_for_task(existing_task)
+                existing_sequence = self._sequence_for_task(existing_task)
+
+                if (
+                    existing_timestamp < bank_timestamp
+                    or (
+                        existing_timestamp == bank_timestamp
+                        and existing_sequence < bank_sequence
+                    )
+                ):
+                    insert_at = idx + 1
+                else:
+                    break
+
+            self._queue.insert(insert_at, bank_task)
+
         task = self._queue.pop(0)
         return TaskDispatch(
             provider=task.provider,
@@ -447,6 +471,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
