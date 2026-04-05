@@ -1,16 +1,3 @@
-# from queue_solution_legacy import Queue
-# from task_types import TaskSubmission
-
-# queue = Queue()
-
-# task1 = TaskSubmission(user_id=1, provider="bank_statements", timestamp='2025-10-20 12:00:00')
-# task2 = TaskSubmission(user_id=1, provider="bank_statements", timestamp='2025-10-20 11:00:00')
-# task3 = TaskSubmission(user_id=1, provider="id_verification", timestamp='2025-10-20 11:00:00')
-
-# print(queue.enqueue(task1))
-# print(queue.enqueue(task2))
-# print(queue.enqueue(task3))
-
 from datetime import datetime
 
 from .task_types import TaskSubmission, TaskDispatch
@@ -87,7 +74,6 @@ def test_size_reflects_current_pending_task_count(queue):
     queue.enqueue(make_task("companies_house", 1, "2025-10-20 12:00:00"))
     assert queue.size == 1
 
-    # credit_check pulls in companies_house dependency, so total grows by 2
     queue.enqueue(make_task("credit_check", 2, "2025-10-20 12:00:00"))
     assert queue.size == 3
 
@@ -123,7 +109,6 @@ def test_enqueue_deduplicates_same_provider_and_user_when_newer_timestamp_arrive
 ):
     assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
 
-    # Same (provider, user_id), but newer timestamp: should not replace existing item.
     assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
     assert queue.size == 1
 
@@ -135,11 +120,9 @@ def test_enqueue_deduplicates_same_provider_and_user_when_newer_timestamp_arrive
 def test_enqueue_replaces_same_provider_and_user_when_earlier_timestamp_arrives(queue):
     assert queue.enqueue(make_task("companies_house", 7, "2025-10-20 12:05:00")) == 1
 
-    # Same (provider, user_id), but earlier timestamp: should replace existing task.
     assert queue.enqueue(make_task("companies_house", 7, "2025-10-20 12:00:00")) == 1
     assert queue.size == 1
 
-    # Add another task so we can verify the earlier replacement now sorts correctly.
     assert queue.enqueue(make_task("id_verification", 8, "2025-10-20 12:01:00")) == 2
 
     first = queue.dequeue()
@@ -262,3 +245,4 @@ def test_non_aged_bank_statement_still_deprioritized(queue):
     assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=2)
     assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=3)
     assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
+

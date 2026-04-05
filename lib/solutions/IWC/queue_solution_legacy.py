@@ -4,9 +4,7 @@ from enum import IntEnum
 
 # LEGACY CODE ASSET
 # RESOLVED on deploy
-from .task_types import TaskSubmission, TaskDispatch
-
-# solutions.IWC
+from solutions.IWC.task_types import TaskSubmission, TaskDispatch
 
 
 class Priority(IntEnum):
@@ -535,4 +533,5 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
