@@ -214,4 +214,3 @@ def test_age_updates_after_earlier_duplicate_replacement(queue):
     queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00"))
 
     assert queue.age == 600
-
