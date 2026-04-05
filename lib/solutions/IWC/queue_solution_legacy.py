@@ -77,7 +77,7 @@ class Queue:
         return tasks
 
     @staticmethod
-    def _priority_for_task(task):
+    def _priority_for_task(task: TaskSubmission) -> Priority:
         metadata = task.metadata
         raw_priority = metadata.get("priority", Priority.NORMAL)
         try:
@@ -230,9 +230,9 @@ class Queue:
         if self.size == 0:
             return 0
         timestamps = [self._timestamp_for_task(task) for task in self._queue]
-        oldest = max(timestamps)
-        youngest = min(timestamps)
-        return int((youngest - oldest).total_seconds())
+        oldest = min(timestamps)
+        newest = max(timestamps)
+        return int((newest - oldest).total_seconds())
 
     def purge(self):
         self._queue.clear()
@@ -322,6 +322,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
