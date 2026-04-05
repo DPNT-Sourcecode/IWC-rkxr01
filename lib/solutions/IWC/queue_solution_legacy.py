@@ -159,6 +159,19 @@ class Queue:
 
     @staticmethod
     def _is_bank_statements_provider(task: TaskSubmission) -> bool:
+        """
+        Determine whether a task belongs to the bank_statements provider.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task to evaluate.
+
+        Returns
+        -------
+        bool
+            True if the task provider is bank_statements, otherwise False.
+        """
         return True if task.provider == "bank_statements" else False
 
     @staticmethod
@@ -192,7 +205,7 @@ class Queue:
 
         The method expands the input task into its dependency closure and
         inserts all tasks into the queue with deduplication and replacement
-        semantics based on timestamp.
+        semantics based on timestamp as well as assigning the task sequence.
 
         Parameters
         ----------
@@ -471,10 +484,3 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
-
-
-
-
-
-
-
