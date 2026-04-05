@@ -160,18 +160,19 @@ class Queue:
     def _is_bank_statments_provider(task: TaskSubmission) -> bool:
         return True if task.provider == "bank_statements" else False
 
-    def _provider_speed_priority(self, task: TaskSubmission, newest_timestamp: datetime | None = None) -> int:
-        if task.provider != "bank_statements":
-            return 0
-        
-        elif newest_timestamp 
-    
     def _is_time_sensitive_bank_task(self, task: TaskSubmission, newest_timestamp: datetime) -> bool:
         if not self._is_bank_statements_provider(task):
             return False
         
         task_timestamp = self._timestamp_for_task(task)
         return (newest_timestamp - task_timestamp) >= timedelta(minutes=5)
+
+    def _provider_speed_priority(self, task: TaskSubmission, newest_timestamp: datetime | None = None) -> int:
+        if task.provider != "bank_statements":
+            return 0
+        if newest_timestamp is not None and self._is_time_sensitive_bank_task(task, newest_timestamp):
+            return 0
+        return 1
 
     def enqueue(self, item: TaskSubmission) -> int:
         """
@@ -410,4 +411,5 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
