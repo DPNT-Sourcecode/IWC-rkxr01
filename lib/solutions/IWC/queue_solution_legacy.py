@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import IntEnum
 
 # LEGACY CODE ASSET
@@ -172,6 +172,12 @@ class Queue:
             0 for normal providers, 1 for "bank_statements".
         """
         return 1 if task.provider == "bank_statements" else 0
+
+    @staticmethod
+    def _is_bank_statments_provider(task: TaskSubmission) -> bool:
+        return True if task.provider == "bank_statements" else False
+    
+    
 
     def enqueue(self, item: TaskSubmission) -> int:
         """
@@ -410,3 +416,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
