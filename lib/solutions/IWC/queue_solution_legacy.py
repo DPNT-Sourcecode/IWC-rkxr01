@@ -147,12 +147,11 @@ class Queue:
 
                 # Compare timestamps
                 if new_task.timestamp < existing_task.timestamp:
-                    # Replace in place (preserves order)
                     self._queue[existing_idx] = new_task
             else:
                 # Append new task
-                index_map[key] = len(existing)
-                existing.append(new_task)
+                index_map[key] = len(self._queue)
+                self._queue.append(new_task)
 
         new_tasks = {}
         for task in tasks:
@@ -318,6 +317,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
