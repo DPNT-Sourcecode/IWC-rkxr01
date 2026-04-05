@@ -4,8 +4,7 @@ from enum import IntEnum
 
 # LEGACY CODE ASSET
 # RESOLVED on deploy
-from .task_types import TaskSubmission, TaskDispatch
-# solutions.IWC
+from solutions.IWC.task_types import TaskSubmission, TaskDispatch
 
 
 class Priority(IntEnum):
@@ -392,12 +391,9 @@ class Queue:
                 existing_timestamp = self._timestamp_for_task(existing_task)
                 existing_sequence = self._sequence_for_task(existing_task)
 
-                should_stay_before_bank = (
-                    existing_timestamp < bank_timestamp
-                    or (
-                        existing_timestamp == bank_timestamp
-                        and existing_sequence < bank_sequence
-                    )
+                should_stay_before_bank = existing_timestamp < bank_timestamp or (
+                    existing_timestamp == bank_timestamp
+                    and existing_sequence < bank_sequence
                 )
 
                 if should_stay_before_bank:
@@ -408,7 +404,6 @@ class Queue:
             self._queue.insert(insert_at, bank_task)
 
         task = self._queue.pop(0)
-        self._sequence -= 1
         return TaskDispatch(
             provider=task.provider,
             user_id=task.user_id,
@@ -541,4 +536,5 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
