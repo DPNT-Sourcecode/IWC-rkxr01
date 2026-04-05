@@ -214,3 +214,53 @@ def test_age_updates_after_earlier_duplicate_replacement(queue):
     queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00"))
 
     assert queue.age == 600
+
+
+#########################################
+# TESTS BANK STATEMENT PRIORITISATION
+#########################################
+
+
+def test_aged_bank_statement_can_move_ahead_of_later_tasks(queue):
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00"))
+    queue.enqueue(make_task("bank_statements", 2, "2025-10-20 12:01:00"))
+    queue.enqueue(make_task("companies_house", 3, "2025-10-20 12:07:00"))
+
+    assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=2)
+    assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=3)
+
+
+def test_aged_bank_statement_does_not_skip_older_timestamp(queue):
+    queue.enqueue(make_task("companies_house", 1, "2025-10-20 12:00:00"))
+    queue.enqueue(make_task("bank_statements", 2, "2025-10-20 12:01:00"))
+    queue.enqueue(make_task("id_verification", 3, "2025-10-20 12:07:00"))
+
+    assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=2)
+    assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=3)
+
+
+def test_aged_bank_statement_uses_fifo_on_tie(queue):
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00"))
+    queue.enqueue(make_task("bank_statements", 2, "2025-10-20 12:02:00"))
+    queue.enqueue(make_task("bank_statements", 1, "2025-10-20 12:02:00"))
+    queue.enqueue(make_task("companies_house", 1, "2025-10-20 12:03:00"))
+    queue.enqueue(make_task("companies_house", 3, "2025-10-20 12:10:00"))
+
+    assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=2)
+    assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=3)
+
+
+def test_non_aged_bank_statement_still_deprioritized(queue):
+    queue.enqueue(make_task("bank_statements", 1, "2025-10-20 12:00:00"))
+    queue.enqueue(make_task("id_verification", 2, "2025-10-20 12:01:00"))
+    queue.enqueue(make_task("companies_house", 3, "2025-10-20 12:04:00"))
+
+    assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=2)
+    assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=3)
+    assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
+
