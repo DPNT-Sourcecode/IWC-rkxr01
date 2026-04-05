@@ -181,3 +181,37 @@ def test_non_bank_tasks_still_use_timestamp_ordering(queue):
 
     assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=2)
     assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=1)
+
+
+#########################################
+# TESTS AGE PROPERTY
+#########################################
+
+
+def test_age_returns_zero_when_queue_is_empty(queue):
+    assert queue.age == 0
+
+
+def test_age_returns_gap_between_oldest_and_newest_task(queue):
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00"))
+    queue.enqueue(make_task("id_verification", 2, "2025-10-20 12:05:00"))
+
+    assert queue.age == 300
+
+
+def test_age_returns_zero_when_only_one_task_exists(queue):
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00"))
+
+    assert queue.age == 0
+
+
+def test_age_updates_after_earlier_duplicate_replacement(queue):
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:05:00"))
+    queue.enqueue(make_task("companies_house", 2, "2025-10-20 12:10:00"))
+
+    assert queue.age == 300
+
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:00:00"))
+
+    assert queue.age == 600
+
