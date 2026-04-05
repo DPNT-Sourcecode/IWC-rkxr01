@@ -1,68 +1,29 @@
-from queue_solution_legacy import Queue
-from task_types import TaskSubmission
+# from queue_solution_legacy import Queue
+# from task_types import TaskSubmission
 
-queue = Queue()
+# queue = Queue()
 
-task1 = TaskSubmission(user_id=1, provider="bank_statements", timestamp='2025-10-20 12:00:00')
-task2 = TaskSubmission(user_id=1, provider="bank_statements", timestamp='2025-10-20 11:00:00')
-task3 = TaskSubmission(user_id=1, provider="id_verification", timestamp='2025-10-20 11:00:00')
+# task1 = TaskSubmission(user_id=1, provider="bank_statements", timestamp='2025-10-20 12:00:00')
+# task2 = TaskSubmission(user_id=1, provider="bank_statements", timestamp='2025-10-20 11:00:00')
+# task3 = TaskSubmission(user_id=1, provider="id_verification", timestamp='2025-10-20 11:00:00')
 
-print(queue.enqueue(task1))
-print(queue.enqueue(task2))
-print(queue.enqueue(task3))
+# print(queue.enqueue(task1))
+# print(queue.enqueue(task2))
+# print(queue.enqueue(task3))
 
-
-# test_queue_solution_legacy.py
 
 from __future__ import annotations
 
-import importlib
-import sys
-import types
-from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+
+from task_types import TaskSubmission, TaskDispatch
+from queue_solution_legacy import Queue
 
 import pytest
 
-
-@dataclass
-class TaskSubmission:
-    provider: str
-    user_id: int
-    timestamp: datetime | str
-    metadata: dict[str, object] = field(default_factory=dict)
-
-
-@dataclass
-class TaskDispatch:
-    provider: str
-    user_id: int
-
-
 @pytest.fixture
-def queue_module():
-    solutions_mod = types.ModuleType("solutions")
-    iwc_mod = types.ModuleType("solutions.IWC")
-    task_types_mod = types.ModuleType("solutions.IWC.task_types")
-
-    task_types_mod.TaskSubmission = TaskSubmission
-    task_types_mod.TaskDispatch = TaskDispatch
-
-    sys.modules["solutions"] = solutions_mod
-    sys.modules["solutions.IWC"] = iwc_mod
-    sys.modules["solutions.IWC.task_types"] = task_types_mod
-
-    if "queue_solution_legacy" in sys.modules:
-        module = importlib.reload(sys.modules["queue_solution_legacy"])
-    else:
-        module = importlib.import_module("queue_solution_legacy")
-
-    return module
-
-
-@pytest.fixture
-def queue(queue_module):
-    return queue_module.Queue()
+def queue():
+    return Queue()
 
 
 def make_task(provider: str, user_id: int, timestamp: str, metadata: dict | None = None):
@@ -178,5 +139,6 @@ def test_purge_clears_queue_and_returns_true(queue):
     assert queue.purge() is True
     assert queue.size == 0
     assert queue.dequeue() is None
+
 
 
