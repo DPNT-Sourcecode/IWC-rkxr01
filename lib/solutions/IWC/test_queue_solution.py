@@ -11,13 +11,10 @@
 # print(queue.enqueue(task2))
 # print(queue.enqueue(task3))
 
+from datetime import datetime
 
-from __future__ import annotations
-
-from datetime import datetime, timedelta
-
-from task_types import TaskSubmission, TaskDispatch
-from queue_solution_legacy import Queue
+from .task_types import TaskSubmission, TaskDispatch
+from .queue_solution_legacy import Queue
 
 import pytest
 
@@ -139,6 +136,7 @@ def test_purge_clears_queue_and_returns_true(queue):
     assert queue.purge() is True
     assert queue.size == 0
     assert queue.dequeue() is None
+
 
 
 
