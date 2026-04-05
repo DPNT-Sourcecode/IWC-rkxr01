@@ -271,6 +271,14 @@ class Queue:
         newest_timestamp = max(self._timestamp_for_task(task) for task in self._queue)
 
         for task in self._queue:
+            metadata = task.metadata
+
+            metadata["priority"] = Priority.NORMAL
+            metadata["group_earliest_timestamp"] = MAX_TIMESTAMP
+
+            if task_count[task.user_id] >= 3:
+                metadata["priority"] = Priority.HIGH
+                metadata["group_earliest_timestamp"] = priority_timestamps[task.user_id]
             # metadata = task.metadata
             # current_earliest = metadata.get("group_earliest_timestamp", MAX_TIMESTAMP)
             # raw_priority = metadata.get("priority")
@@ -434,3 +442,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
