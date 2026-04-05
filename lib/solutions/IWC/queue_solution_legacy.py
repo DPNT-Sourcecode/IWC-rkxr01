@@ -227,6 +227,7 @@ class Queue:
                     if metadata["_queue_sequence"] is None:
                         metadata["_queue_sequence"] = self._sequence
                         self._sequence += 1
+                    print(self._sequence_for_task(new_task))
                     self._queue[existing_idx] = new_task
             else:
                 metadata = new_task.metadata
@@ -235,6 +236,7 @@ class Queue:
                 metadata.setdefault("_queue_sequence", self._sequence)
                 self._sequence += 1
                 index_map[key] = len(self._queue)
+                print(self._sequence_for_task(new_task))
                 self._queue.append(new_task)
 
         return self.size
@@ -433,6 +435,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
