@@ -157,25 +157,14 @@ class Queue:
         return timestamp
 
     @staticmethod
-    def _provider_speed_priority(task: TaskSubmission) -> int:
-        """
-        Assign a relative ordering rank based on provider type.
-
-        Parameters
-        ----------
-        task : TaskSubmission
-            The task whose provider rank is to be determined.
-
-        Returns
-        -------
-        int
-            0 for normal providers, 1 for "bank_statements".
-        """
-        return 1 if task.provider == "bank_statements" else 0
-
-    @staticmethod
     def _is_bank_statments_provider(task: TaskSubmission) -> bool:
         return True if task.provider == "bank_statements" else False
+
+    def _provider_speed_priority(self, task: TaskSubmission, newest_timestamp: datetime | None = None) -> int:
+        if task.provider != "bank_statements":
+            return 0
+        
+        elif newest_timestamp 
     
     def _is_time_sensitive_bank_task(self, task: TaskSubmission, newest_timestamp: datetime) -> bool:
         if not self._is_bank_statements_provider(task):
@@ -421,3 +410,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
