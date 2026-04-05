@@ -51,7 +51,6 @@ REGISTERED_PROVIDERS: list[Provider] = [
 class Queue:
     def __init__(self):
         self._queue = []
-        self._priority_queue = {}
 
     def _collect_dependencies(self, task: TaskSubmission) -> list[TaskSubmission]:
         provider = next((p for p in REGISTERED_PROVIDERS if p.name == task.provider), None)
@@ -91,6 +90,10 @@ class Queue:
         if isinstance(timestamp, str):
             return datetime.fromisoformat(timestamp).replace(tzinfo=None)
         return timestamp
+
+    @staticmethod
+    def _provider_speed_priority(task):
+        return 1 if "bank_statements" else 
 
     def enqueue(self, item: TaskSubmission) -> int:
         """
@@ -301,3 +304,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
