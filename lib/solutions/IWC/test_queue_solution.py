@@ -263,4 +263,3 @@ def test_non_aged_bank_statement_still_deprioritized(queue):
     assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=2)
     assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=3)
     assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
-
