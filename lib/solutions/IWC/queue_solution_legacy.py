@@ -4,7 +4,7 @@ from enum import IntEnum
 
 # LEGACY CODE ASSET
 # RESOLVED on deploy
-from .task_types import TaskSubmission, TaskDispatch
+from solutions.IWC.task_types import TaskSubmission, TaskDispatch
 # solutions.IWC.
 
 class Priority(IntEnum):
@@ -145,34 +145,18 @@ class Queue:
                 existing_idx = index_map[key]
                 existing_task = self._queue[existing_idx]
 
-                # Compare timestamps
                 if new_task.timestamp < existing_task.timestamp:
+                    metadata = new_task.metadata
+                    metadata.setdefault("priority", Priority.NORMAL)
+                    metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
                     self._queue[existing_idx] = new_task
             else:
-                # Append new task
+                metadata = new_task.metadata
+                metadata.setdefault("priority", Priority.NORMAL)
+                metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
                 index_map[key] = len(self._queue)
                 self._queue.append(new_task)
 
-        new_tasks = {}
-        for task in tasks:
-            metadata = task.metadata
-            metadata.setdefault("priority", Priority.NORMAL)
-            metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
-            new_tasks[(task.provider, task.user_id)] = task
-
-        if self.size == 0:
-            self._queue.extend(tasks)
-            return self.size
-
-        for idx, existing_task in enumerate(self._queue):
-            existing_task_id = (existing_task.provider, existing_task.user_id)
-            if existing_task_id in new_tasks:
-                print("found in new tasks")
-                if new_tasks[existing_task_id].timestamp < existing_task.timestamp:
-                    self._queue.pop(idx)
-                    self._queue.append(new_tasks[existing_task_id])
-                else:
-                    continue
         return self.size
 
     def dequeue(self):
@@ -317,6 +301,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
