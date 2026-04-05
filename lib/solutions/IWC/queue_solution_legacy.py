@@ -93,7 +93,7 @@ class Queue:
 
     @staticmethod
     def _provider_speed_priority(task):
-        return 1 if "bank_statements" else 
+        return 1 if task.provider == "bank_statements" else 0
 
     def enqueue(self, item: TaskSubmission) -> int:
         """
@@ -199,6 +199,7 @@ class Queue:
             key=lambda i: (
                 self._priority_for_task(i),
                 self._earliest_group_timestamp_for_task(i),
+                self._provider_speed_priority(i),
                 self._timestamp_for_task(i),
             )
         )
@@ -304,4 +305,5 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
