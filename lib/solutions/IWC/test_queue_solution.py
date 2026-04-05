@@ -181,5 +181,3 @@ def test_non_bank_tasks_still_use_timestamp_ordering(queue):
 
     assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=2)
     assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=1)
-
-
