@@ -136,8 +136,3 @@ print(queue.enqueue(task3))
 #     assert queue.purge() is True
 #     assert queue.size == 0
 #     assert queue.dequeue() is None
-
-
-
-
-
