@@ -391,10 +391,15 @@ class Queue:
                 existing_timestamp = self._timestamp_for_task(existing_task)
                 existing_sequence = self._sequence_for_task(existing_task)
 
-                if existing_timestamp < bank_timestamp or (
-                    existing_timestamp == bank_timestamp
-                    and existing_sequence < bank_sequence
-                ):
+                should_stay_before_bank = (
+                    existing_timestamp < bank_timestamp
+                    or (
+                        existing_timestamp == bank_timestamp
+                        and existing_sequence < bank_sequence
+                    )
+                )
+
+                if should_stay_before_bank:
                     insert_at = idx + 1
                 else:
                     break
@@ -533,5 +538,6 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
