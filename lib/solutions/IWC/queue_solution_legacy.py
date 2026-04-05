@@ -175,13 +175,45 @@ class Queue:
         return True if task.provider == "bank_statements" else False
 
     @staticmethod
-    def _sequence_for_task(task: TaskSubmission):
-        print(task.metadata.get("_queue_sequence", 0))
+    def _sequence_for_task(task: TaskSubmission) -> int:
+        """
+        Retrieve the enqueue sequence number for a task.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task whose sequence number is to be retrieved.
+
+        Returns
+        -------
+        int
+            The sequence number assigned at enqueue time, or 0 if not present.
+        """
         return task.metadata.get("_queue_sequence", 0)
 
     def _is_time_sensitive_bank_task(
         self, task: TaskSubmission, newest_timestamp: datetime
     ) -> bool:
+        """
+        Determine whether a bank statements task qualifies as time-sensitive.
+
+        A task is considered time-sensitive if:
+        - it belongs to the bank_statements provider, and its timestamp is
+            at least 5 minutes older than the newest task currently in the queue.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task to evaluate.
+        newest_timestamp : datetime
+            The most recent timestamp present in the queue.
+
+        Returns
+        -------
+        bool
+            True if the task is a time-sensitive bank statements task,
+            otherwise False.
+        """
         if not self._is_bank_statements_provider(task):
             return False
 
@@ -191,6 +223,25 @@ class Queue:
     def _provider_speed_priority(
         self, task: TaskSubmission, newest_timestamp: datetime | None = None
     ) -> int:
+        """
+        Assign a provider-based priority ranking for queue ordering.
+
+        Parameters
+        ----------
+        task : TaskSubmission
+            The task whose provider priority is to be determined.
+        newest_timestamp : datetime, optional
+            The newest timestamp currently present in the queue. If provided,
+            it is used to determine whether a bank statements task is
+            time-sensitive.
+
+        Returns
+        -------
+        int
+            A numeric rank used in sorting:
+            - 0 for normal providers and time-sensitive bank statements tasks
+            - 1 for non-time-sensitive bank_statements tasks
+        """
         if task.provider != "bank_statements":
             return 0
         if newest_timestamp is not None and self._is_time_sensitive_bank_task(
@@ -329,7 +380,7 @@ class Queue:
             )
         )
 
-        # Loop to remove any identified aged bankstatements and reinsert based on 
+        # Loop to remove any identified aged bankstatements and reinsert based on
         # timestamp and sequence order
         for bank_task in aged_bank_tasks:
             self._queue.remove(bank_task)
@@ -484,3 +535,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
