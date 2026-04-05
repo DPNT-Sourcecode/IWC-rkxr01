@@ -5,18 +5,23 @@ from enum import IntEnum
 # LEGACY CODE ASSET
 # RESOLVED on deploy
 from solutions.IWC.task_types import TaskSubmission, TaskDispatch
+
 # solutions.IWC.
+
 
 class Priority(IntEnum):
     """Represents the queue ordering tiers observed in the legacy system."""
+
     HIGH = 1
     NORMAL = 2
+
 
 @dataclass
 class Provider:
     name: str
     base_url: str
     depends_on: list[str]
+
 
 MAX_TIMESTAMP = datetime.max.replace(tzinfo=None)
 
@@ -48,12 +53,15 @@ REGISTERED_PROVIDERS: list[Provider] = [
     ID_VERIFICATION_PROVIDER,
 ]
 
+
 class Queue:
     def __init__(self):
         self._queue = []
 
     def _collect_dependencies(self, task: TaskSubmission) -> list[TaskSubmission]:
-        provider = next((p for p in REGISTERED_PROVIDERS if p.name == task.provider), None)
+        provider = next(
+            (p for p in REGISTERED_PROVIDERS if p.name == task.provider), None
+        )
         if provider is None:
             return []
 
@@ -135,8 +143,7 @@ class Queue:
         """
 
         index_map = {
-            (task.user_id, task.provider): i
-            for i, task in enumerate(self._queue)
+            (task.user_id, task.provider): i for i, task in enumerate(self._queue)
         }
 
         tasks = [*self._collect_dependencies(item), item]
@@ -171,7 +178,9 @@ class Queue:
         priority_timestamps = {}
         for user_id in user_ids:
             user_tasks = [t for t in self._queue if t.user_id == user_id]
-            earliest_timestamp = sorted(user_tasks, key=lambda t: t.timestamp)[0].timestamp
+            earliest_timestamp = sorted(user_tasks, key=lambda t: t.timestamp)[
+                0
+            ].timestamp
             priority_timestamps[user_id] = earliest_timestamp
             task_count[user_id] = len(user_tasks)
 
@@ -187,7 +196,9 @@ class Queue:
             if priority_level is None or priority_level == Priority.NORMAL:
                 metadata["group_earliest_timestamp"] = MAX_TIMESTAMP
                 if task_count[task.user_id] >= 3:
-                    metadata["group_earliest_timestamp"] = priority_timestamps[task.user_id]
+                    metadata["group_earliest_timestamp"] = priority_timestamps[
+                        task.user_id
+                    ]
                     metadata["priority"] = Priority.HIGH
                 else:
                     metadata["priority"] = Priority.NORMAL
@@ -221,6 +232,7 @@ class Queue:
     def purge(self):
         self._queue.clear()
         return True
+
 
 """
 ===================================================================================================

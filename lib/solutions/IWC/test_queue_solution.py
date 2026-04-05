@@ -18,12 +18,15 @@ from .queue_solution_legacy import Queue
 
 import pytest
 
+
 @pytest.fixture
 def queue():
     return Queue()
 
 
-def make_task(provider: str, user_id: int, timestamp: str, metadata: dict | None = None):
+def make_task(
+    provider: str, user_id: int, timestamp: str, metadata: dict | None = None
+):
     return TaskSubmission(
         provider=provider,
         user_id=user_id,
@@ -31,14 +34,14 @@ def make_task(provider: str, user_id: int, timestamp: str, metadata: dict | None
         metadata={} if metadata is None else metadata,
     )
 
+
 #########################################
 # TESTS EXAMPLES IN ORIGINAL SPEC
 #########################################
 
+
 def test_dependency_resolution_credit_check_enqueues_companies_house_first(queue):
-    size = queue.enqueue(
-        make_task("credit_check", 1, "2025-10-20 12:00:00")
-    )
+    size = queue.enqueue(make_task("credit_check", 1, "2025-10-20 12:00:00"))
 
     assert size == 2
     assert queue.size == 2
@@ -73,36 +76,10 @@ def test_rule_of_three_moves_all_tasks_for_that_user_to_front(queue):
     assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
     assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=2)
 
-#############
 
-
-def test_enqueue_deduplicates_same_provider_and_user_when_newer_timestamp_arrives(queue):
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
-
-    # Same (provider, user_id), but newer timestamp: should not replace existing item.
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
-    assert queue.size == 1
-
-    dispatched = queue.dequeue()
-    assert dispatched == TaskDispatch(provider="bank_statements", user_id=7)
-    assert queue.dequeue() is None
-
-
-def test_enqueue_replaces_same_provider_and_user_when_earlier_timestamp_arrives(queue):
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
-
-    # Same (provider, user_id), but earlier timestamp: should replace existing task.
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
-    assert queue.size == 1
-
-    # Add another task so we can verify the earlier replacement now sorts correctly.
-    assert queue.enqueue(make_task("id_verification", 8, "2025-10-20 12:01:00")) == 2
-
-    first = queue.dequeue()
-    second = queue.dequeue()
-
-    assert first == TaskDispatch(provider="bank_statements", user_id=7)
-    assert second == TaskDispatch(provider="id_verification", user_id=8)
+#########################################
+# TESTS HELPER FUNCTIONS
+#########################################
 
 
 def test_size_reflects_current_pending_task_count(queue):
@@ -135,4 +112,73 @@ def test_purge_clears_queue_and_returns_true(queue):
     assert queue.purge() is True
     assert queue.size == 0
     assert queue.dequeue() is None
+
+
+#########################################
+# TESTS DEDUPLICATION LOGIC
+#########################################
+
+
+def test_enqueue_deduplicates_same_provider_and_user_when_newer_timestamp_arrives(
+    queue,
+):
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
+
+    # Same (provider, user_id), but newer timestamp: should not replace existing item.
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
+    assert queue.size == 1
+
+    dispatched = queue.dequeue()
+    assert dispatched == TaskDispatch(provider="bank_statements", user_id=7)
+    assert queue.dequeue() is None
+
+
+def test_enqueue_replaces_same_provider_and_user_when_earlier_timestamp_arrives(queue):
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
+
+    # Same (provider, user_id), but earlier timestamp: should replace existing task.
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
+    assert queue.size == 1
+
+    # Add another task so we can verify the earlier replacement now sorts correctly.
+    assert queue.enqueue(make_task("id_verification", 8, "2025-10-20 12:01:00")) == 2
+
+    first = queue.dequeue()
+    second = queue.dequeue()
+
+    assert first == TaskDispatch(provider="bank_statements", user_id=7)
+    assert second == TaskDispatch(provider="id_verification", user_id=8)
+
+#########################################
+# TESTS DEDUPLICATION LOGIC
+#########################################
+
+
+def test_enqueue_deduplicates_same_provider_and_user_when_newer_timestamp_arrives(queue):
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
+
+    # Same (provider, user_id), but newer timestamp: should not replace existing item.
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
+    assert queue.size == 1
+
+    dispatched = queue.dequeue()
+    assert dispatched == TaskDispatch(provider="bank_statements", user_id=7)
+    assert queue.dequeue() is None
+
+
+def test_enqueue_replaces_same_provider_and_user_when_earlier_timestamp_arrives(queue):
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
+
+    # Same (provider, user_id), but earlier timestamp: should replace existing task.
+    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
+    assert queue.size == 1
+
+    # Add another task so we can verify the earlier replacement now sorts correctly.
+    assert queue.enqueue(make_task("id_verification", 8, "2025-10-20 12:01:00")) == 2
+
+    first = queue.dequeue()
+    second = queue.dequeue()
+
+    assert first == TaskDispatch(provider="bank_statements", user_id=7)
+    assert second == TaskDispatch(provider="id_verification", user_id=8)
 
