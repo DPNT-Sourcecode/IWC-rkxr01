@@ -280,7 +280,7 @@ class Queue:
                 existing_idx = index_map[key]
                 existing_task = self._queue[existing_idx]
 
-                if new_task.timestamp < existing_task.timestamp:
+                if self._timestamp_for_task(new_task) < self._timestamp_for_task(existing_task):
                     metadata = new_task.metadata
                     metadata.setdefault("priority", Priority.NORMAL)
                     metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
@@ -536,5 +536,6 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
