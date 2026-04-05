@@ -253,7 +253,7 @@ class Queue:
             ].timestamp
             priority_timestamps[user_id] = earliest_timestamp
             task_count[user_id] = len(user_tasks)
-        
+
         newest_timestamp = max(self._timestamp_for_task(task) for task in self._queue)
 
         for task in self._queue:
@@ -425,6 +425,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
