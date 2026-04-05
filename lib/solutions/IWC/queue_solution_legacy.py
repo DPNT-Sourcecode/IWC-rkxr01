@@ -131,7 +131,29 @@ class Queue:
         enqueued alongside the input item.
         """
 
+        index_map = {
+            (task.user_id, task.provider): i
+            for i, task in enumerate(self._queue)
+        }
+
         tasks = [*self._collect_dependencies(item), item]
+
+        for new_task in tasks:
+            key = (new_task.user_id, new_task.provider)
+
+            if key in index_map:
+                existing_idx = index_map[key]
+                existing_task = self._queue[existing_idx]
+
+                # Compare timestamps
+                if new_task.timestamp < existing_task.timestamp:
+                    # Replace in place (preserves order)
+                    self._queue[existing_idx] = new_task
+            else:
+                # Append new task
+                index_map[key] = len(existing)
+                existing.append(new_task)
+
         new_tasks = {}
         for task in tasks:
             metadata = task.metadata
@@ -296,5 +318,6 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
