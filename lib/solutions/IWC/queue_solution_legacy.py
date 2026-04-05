@@ -248,6 +248,7 @@ class Queue:
         - Rule of 3 (priority escalation for users with >= 3 tasks)
         - Provider deprioritisation ("bank_statements")
         - Timestamp ordering
+        - Prioritisation for aged bank statements (FIFO if timestamps are tied)
 
         Returns
         -------
@@ -315,6 +316,8 @@ class Queue:
             )
         )
 
+        # Loop to remove any identified aged bankstatements and reinsert based on 
+        # timestamp and sequence order
         for bank_task in aged_bank_tasks:
             self._queue.remove(bank_task)
 
@@ -326,12 +329,9 @@ class Queue:
                 existing_timestamp = self._timestamp_for_task(existing_task)
                 existing_sequence = self._sequence_for_task(existing_task)
 
-                if (
-                    existing_timestamp < bank_timestamp
-                    or (
-                        existing_timestamp == bank_timestamp
-                        and existing_sequence < bank_sequence
-                    )
+                if existing_timestamp < bank_timestamp or (
+                    existing_timestamp == bank_timestamp
+                    and existing_sequence < bank_sequence
                 ):
                     insert_at = idx + 1
                 else:
@@ -471,6 +471,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
