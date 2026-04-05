@@ -217,6 +217,10 @@ class Queue:
                     metadata = new_task.metadata
                     metadata.setdefault("priority", Priority.NORMAL)
                     metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
+                    metadata["_queue_sequence"] = existing_task.metadata.get("_queue_sequence")
+                    if metadata["_queue_sequence"] is None:
+                        metadata["_queue_sequence"] = self._sequence
+                        self._sequence += 1
                     self._queue[existing_idx] = new_task
             else:
                 metadata = new_task.metadata
@@ -422,4 +426,5 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
