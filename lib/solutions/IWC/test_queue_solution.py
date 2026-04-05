@@ -25,15 +25,6 @@ from datetime import datetime, timedelta
 import pytest
 
 
-# ---------------------------------------------------------------------------
-# Test bootstrap:
-# queue_solution_legacy.py imports:
-#   from solutions.IWC.task_types import TaskSubmission, TaskDispatch
-#
-# To keep this test file self-contained, we inject a compatible module into
-# sys.modules before importing queue_solution_legacy.
-# ---------------------------------------------------------------------------
-
 @dataclass
 class TaskSubmission:
     provider: str
@@ -187,4 +178,5 @@ def test_purge_clears_queue_and_returns_true(queue):
     assert queue.purge() is True
     assert queue.size == 0
     assert queue.dequeue() is None
+
 
