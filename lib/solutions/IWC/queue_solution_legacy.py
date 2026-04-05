@@ -161,6 +161,10 @@ class Queue:
     def _is_bank_statements_provider(task: TaskSubmission) -> bool:
         return True if task.provider == "bank_statements" else False
 
+    @staticmethod
+    def _sequence_for_task(task: TaskSubmission):
+        return task.metadata.get("_queue_sequence", 0)
+
     def _is_time_sensitive_bank_task(
         self, task: TaskSubmission, newest_timestamp: datetime
     ) -> bool:
@@ -217,7 +221,9 @@ class Queue:
                     metadata = new_task.metadata
                     metadata.setdefault("priority", Priority.NORMAL)
                     metadata.setdefault("group_earliest_timestamp", MAX_TIMESTAMP)
-                    metadata["_queue_sequence"] = existing_task.metadata.get("_queue_sequence")
+                    metadata["_queue_sequence"] = existing_task.metadata.get(
+                        "_queue_sequence"
+                    )
                     if metadata["_queue_sequence"] is None:
                         metadata["_queue_sequence"] = self._sequence
                         self._sequence += 1
@@ -291,6 +297,7 @@ class Queue:
                 self._earliest_group_timestamp_for_task(i),
                 self._provider_speed_priority(i, newest_timestamp),
                 self._timestamp_for_task(i),
+                self._sequence_for_task(i),
             )
         )
 
@@ -426,5 +433,6 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
