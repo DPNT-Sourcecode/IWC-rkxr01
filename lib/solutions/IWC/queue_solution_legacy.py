@@ -258,18 +258,12 @@ class Queue:
 
         for task in self._queue:
             metadata = task.metadata
+            current_earliest = metadata.get("group_earliest_timestamp", MAX_TIMESTAMP)
             raw_priority = metadata.get("priority")
             try:
                 priority_level = Priority(raw_priority)
             except (TypeError, ValueError):
                 priority_level = None
-
-            if self._is_time_sensitive_bank_task(task, newest_timestamp):
-                metadata["priority"] = Priority.HIGH
-                metadata["group_earliest_timestamp"] = self._timestamp_for_task(task)
-                continue
-
-            current_earliest = metadata.get("group_earliest_timestamp", MAX_TIMESTAMP)
 
             if priority_level is None or priority_level == Priority.NORMAL:
                 metadata["group_earliest_timestamp"] = MAX_TIMESTAMP
@@ -425,6 +419,7 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
 
 
 
