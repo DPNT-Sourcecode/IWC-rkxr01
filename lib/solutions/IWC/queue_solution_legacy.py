@@ -408,6 +408,7 @@ class Queue:
             self._queue.insert(insert_at, bank_task)
 
         task = self._queue.pop(0)
+        self._sequence -= 1
         return TaskDispatch(
             provider=task.provider,
             user_id=task.user_id,
@@ -445,7 +446,7 @@ class Queue:
 
     def purge(self) -> bool:
         """
-        Clear all tasks from the queue.
+        Clear all tasks from the queue and reset sequence.
 
         Returns
         -------
@@ -453,6 +454,7 @@ class Queue:
             True if the queue was successfully cleared.
         """
         self._queue.clear()
+        self._sequence = 0
         return True
 
 
@@ -539,3 +541,4 @@ async def queue_worker():
         logger.info(f"Finished task: {task}")
 ```
 """
+
