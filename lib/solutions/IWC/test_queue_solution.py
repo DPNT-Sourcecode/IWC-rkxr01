@@ -150,35 +150,24 @@ def test_enqueue_replaces_same_provider_and_user_when_earlier_timestamp_arrives(
     assert second == TaskDispatch(provider="id_verification", user_id=8)
 
 #########################################
-# TESTS DEDUPLICATION LOGIC
+# TESTS PROVIDER PRIORITY LOGIC
 #########################################
 
+def test_bank_statements_is_deprioritized_for_non_rule_of_three_users(queue):
+    queue.enqueue(make_task("bank_statements", 1, "2025-10-20 12:00:00"))
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:01:00"))
+    queue.enqueue(make_task("companies_house", 2, "2025-10-20 12:02:00"))
 
-def test_enqueue_deduplicates_same_provider_and_user_when_newer_timestamp_arrives(queue):
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
+    assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=2)
+    assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
 
-    # Same (provider, user_id), but newer timestamp: should not replace existing item.
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
-    assert queue.size == 1
+def test_bank_statements_is_last_within_prioritized_user_group(queue):
+    queue.enqueue(make_task("bank_statements", 1, "2025-10-20 12:00:00"))
+    queue.enqueue(make_task("id_verification", 1, "2025-10-20 12:01:00"))
+    queue.enqueue(make_task("companies_house", 1, "2025-10-20 12:02:00"))
 
-    dispatched = queue.dequeue()
-    assert dispatched == TaskDispatch(provider="bank_statements", user_id=7)
-    assert queue.dequeue() is None
-
-
-def test_enqueue_replaces_same_provider_and_user_when_earlier_timestamp_arrives(queue):
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:05:00")) == 1
-
-    # Same (provider, user_id), but earlier timestamp: should replace existing task.
-    assert queue.enqueue(make_task("bank_statements", 7, "2025-10-20 12:00:00")) == 1
-    assert queue.size == 1
-
-    # Add another task so we can verify the earlier replacement now sorts correctly.
-    assert queue.enqueue(make_task("id_verification", 8, "2025-10-20 12:01:00")) == 2
-
-    first = queue.dequeue()
-    second = queue.dequeue()
-
-    assert first == TaskDispatch(provider="bank_statements", user_id=7)
-    assert second == TaskDispatch(provider="id_verification", user_id=8)
+    assert queue.dequeue() == TaskDispatch(provider="id_verification", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="companies_house", user_id=1)
+    assert queue.dequeue() == TaskDispatch(provider="bank_statements", user_id=1)
 
